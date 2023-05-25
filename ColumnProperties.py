@@ -48,39 +48,54 @@ def viewproperties(df):
             categories = 'NA'
         else:
             categories = list(nonBlankColumn.unique())
-
+        
         if nonBlankColumn.dtype == 'int64':
             statValues[col] = {'Data Type' : 'Integer',
                             'Categories' : categories,
-                            'Minimum Value' : int(nonBlankColumn.min()),
-                            'Median Value' : int(nonBlankColumn.median()),
-                            'Maximum Value' : int(nonBlankColumn.max())}
+                            'Minimum Value' : nonBlankColumn.min(),
+                            '25th Percentile' : nonBlankColumn.quantile(.25),
+                            '50th Percentile' : nonBlankColumn.quantile(.5),
+                            '75th Percentile' : nonBlankColumn.quantile(.75),
+                            'Maximum Value' : nonBlankColumn.max(),
+                            'Mode' : "NA"}
             
         if nonBlankColumn.dtype == 'float64':
             statValues[col] = {'Data Type' : 'Decimal',
                             'Categories' : categories,
-                            'Minimum Value' : float(nonBlankColumn.min()),
-                            'Median Value' : float(nonBlankColumn.median()),
-                            'Maximum Value' : float(nonBlankColumn.max())}
+                            'Minimum Value' : nonBlankColumn.min(),
+                            '25th Percentile' : nonBlankColumn.quantile(.25),
+                            '50th Percentile' : nonBlankColumn.quantile(.5),
+                            '75th Percentile' : nonBlankColumn.quantile(.75),
+                            'Maximum Value' : nonBlankColumn.max(),
+                            'Mode' : "NA"}
             
         if nonBlankColumn.dtype == 'datetime64[ns]':
             statValues[col] = {'Data Type' : 'Date/Time',
                             'Categories' : categories,
                             'Minimum Value' : nonBlankColumn.min(),
-                            'Median Value' : nonBlankColumn.median(),
-                            'Maximum Value' : nonBlankColumn.max()}
+                            '25th Percentile' : nonBlankColumn.quantile(.25),
+                            '50th Percentile' : nonBlankColumn.quantile(.5),
+                            '75th Percentile' : nonBlankColumn.quantile(.75),
+                            # '25th Percentile': "NA",
+                            # '50th Percentile': "NA",
+                            # '75th Percentile': "NA",
+                            'Maximum Value' : nonBlankColumn.max(),
+                            'Mode' : "NA"}
             
         if nonBlankColumn.dtype == 'object':
             statValues[col] = {'Data Type' : 'Text',
                             'Categories' : categories,
                             'Minimum Value' : 'NA',
-                            'Median Value' : 'NA',
-                            'Maximum Value' : 'NA'}       
+                            '25th Percentile' : 'NA',
+                            '50th Percentile' : 'NA',
+                            '75th Percentile' : 'NA',
+                            'Maximum Value' : 'NA',
+                            'Mode' : "NA"}              
     return statValues
 
 @app.route("/api/getFiles", methods=['POST'])
-@cross_origin(origin='http://localhost/5000',headers=['Content-Type'])
-@cache.cached(timeout=60)
+@cross_origin(origin='https://dq-tool-frtnd.azurewebsites.net/',headers=['Content-Type'])
+@cache.cached(timeout = 10)
 
 
 def getFiles():
@@ -94,8 +109,8 @@ def getFiles():
         for sheet_name in selected_sheets:
             df = pd.read_excel(excel_data, sheet_name=sheet_name, header=0)
             result = viewproperties(df)  # Get the result from viewproperties(df)
-            results.append(result)            
-    return jsonify(results)
+            results.append(result)                   
+    return json.dumps(results, default = str)
 
 
 if __name__ == "__main__":
